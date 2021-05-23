@@ -12,58 +12,29 @@ const fetchData = async (searchTerm) => {
   return response.data.Search;
 };
 
-//Debouncing the input event,so that search starts after user stops typing
 
-const root = document.querySelector(".autocomplete");
-root.innerHTML = `
-  <label><b>Search For a Movie</b></label>
-  <input class="input" />
-  <div class="dropdown">
-    <div class="dropdown-menu">
-      <div class="dropdown-content results"></div>
-    </div>
-  </div>
-`;
-
-const input = document.querySelector(".input");
-const dropdown = document.querySelector(".dropdown");
-const resultsWrapper = document.querySelector(".results");
-
-const onInput = async (event) => {
-  const movies = await fetchData(event.target.value);
-  if (!movies.length) {
-    dropdown.classList.remove("is-active");
-    return;
-  }
-  resultsWrapper.innerHTML = "";
-
-  dropdown.classList.add("is-active");
-  for (let movie of movies) {
-    const options = document.createElement("a");
-    // if poster === na then (?) assign empty string if not assign poster
-    const imgSrc = movie.Poster === "N/A" ? "" : movie.Poster;
-
-    options.classList.add("dropdown-item");
-    options.innerHTML = `
+createAutoComplete({
+  root: document.querySelector(".autocomplete"),
+  renderOption(movie) {
+  const imgSrc = movie.Poster === "N/A" ? "" : movie.Poster;
+    return `
       <img src="${imgSrc}" />
-      ${movie.Title}
+      ${movie.Title} (${movie.Year})
     `;
-
-    options.addEventListener("click", () => {
-      dropdown.classList.remove("is-active");
-      input.value = movie.Title;
-      movieSelect(movie);
-    });
-    document.querySelector(".results").appendChild(options);
-  }
-};
-input.addEventListener("input", debounce(onInput, 500));
-
-document.addEventListener("click", (event) => {
-  if (!root.contains(event.target)) {
-    dropdown.classList.remove("is-active");
   }
 });
+
+// createAutoComplete({
+//   root: document.querySelector(".autocomplete-two"),
+//   renderOption(movie) {
+//     const imgSrc = movie.Poster === "N/A" ? "" : movie.Poster;
+//     return `
+//       <img src="${imgSrc}" />
+//       ${movie.Title} (${movie.Year})
+//     `;
+//   },
+// });
+
 
 const movieSelect = async (movie) => {
   const responses = await axios.get("http://www.omdbapi.com/", {
