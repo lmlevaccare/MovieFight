@@ -32,9 +32,9 @@ const resultsWrapper = document.querySelector(".results");
 const onInput = async (event) => {
   const movies = await fetchData(event.target.value);
   if (!movies.length) {
-    dropdown.classList.remove('is-active');
+    dropdown.classList.remove("is-active");
     return;
-}
+  }
   resultsWrapper.innerHTML = "";
 
   dropdown.classList.add("is-active");
@@ -49,34 +49,71 @@ const onInput = async (event) => {
       ${movie.Title}
     `;
 
-    options.addEventListener('click', () => {
-      dropdown.classList.remove('is-active')
-      input.value = `${movie.Title}`
-      onMovieSelect(movie)
-    })
+    options.addEventListener("click", () => {
+      dropdown.classList.remove("is-active");
+      input.value = movie.Title;
+      movieSelect(movie);
+    });
     document.querySelector(".results").appendChild(options);
-
   }
 };
 input.addEventListener("input", debounce(onInput, 500));
 
-document.addEventListener('click', event => {
+document.addEventListener("click", (event) => {
   if (!root.contains(event.target)) {
-    dropdown.classList.remove('is-active')
-   
+    dropdown.classList.remove("is-active");
   }
-
 });
 
-const onMovieSelect = async movie => {
-  console.log(movie)
+const movieSelect = async (movie) => {
   const responses = await axios.get("http://www.omdbapi.com/", {
     params: {
       apikey: "750758ce",
       i: movie.imdbID,
     },
   });
-  ;
-   console.log("new data", responses.data);
+  console.log("secondResponse", responses);
+  // return responses.data;
+  document.querySelector("#summary").innerHTML = movieTemplate(responses.data);
 };
 
+const movieTemplate = (movieDetail) => {
+  return `
+    <article class="media">
+      <figure class="media-left">
+        <p class="image">
+          <img src="${movieDetail.Poster}" />
+        </p>
+      </figure>
+      <div class="media-content">
+        <div class="content">
+          <h1>${movieDetail.Title}</h1>
+          <h4>${movieDetail.Genre}</h4>
+          <p>${movieDetail.Plot}</p>
+        </div>
+      </div>
+    </article>
+    <article class="notification is-primary">
+    <p class="title">${movieDetail.Awards}</p>
+    <p class="subtitle">Awards</p>
+    </article>
+       <article class="notification is-primary">
+    <p class="title">${movieDetail.BoxOffice}</p>
+    <p class="subtitle">Box Office</p>
+    </article>
+       <article class="notification is-primary">
+    <p class="title">${movieDetail.Metascore}</p>
+    <p class="subtitle">Metascore</p>
+    </article>
+       <article class="notification is-primary">
+    <p class="title">${movieDetail.imdbRating}</p>
+    <p class="subtitle">IMBD Rating</p>
+    </article>
+       <article class="notification is-primary">
+    <p class="title">${movieDetail.imdbVotes}</p>
+    <p class="subtitle">IMBD Votes</p>
+    </article>
+  `;
+};
+
+// phase 2 secound search for movie code
